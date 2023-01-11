@@ -1,0 +1,265 @@
+////////////////////////////////////////////////////////////////
+//
+// Copyright (C) 2016 Affymetrix, Inc.
+//
+// This program is free software; you can redistribute it and/or modify 
+// it under the terms of the GNU General Public License (version 2) as 
+// published by the Free Software Foundation.
+// 
+// This program is distributed in the hope that it will be useful, 
+// but WITHOUT ANY WARRANTY; without even the implied warranty of 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License 
+// along with this program;if not, write to the 
+// 
+// Free Software Foundation, Inc., 
+// 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+//
+////////////////////////////////////////////////////////////////
+//
+// ~/apt2-src/util-package/IndexHeader.cpp ---
+//
+// Revision History:
+// Created by David Le on 11/30/2015
+//
+
+#include "IndexHeader.h"
+#include "util/Convert.h"
+#include "util/Fs.h"
+#include "util/Util.h"
+
+#include <algorithm>
+#include <iostream>
+#include <sstream>
+#include <string.h>
+#include <memory>
+
+using namespace std;
+
+IndexHeader::IndexHeader()
+{
+    reset();
+}
+
+IndexHeader::~IndexHeader()
+{
+}
+
+void IndexHeader::reset()
+{
+    m_strErrMsg = "";
+    m_strIndexFile = "";
+
+    m_dFormatVersion = 1.0; // initial version
+    m_strTransformMethod = "MVA"; // default to Minus vs Average
+    m_iNumProbeSets = 0;
+    m_iNumSamples = 0;
+    m_iNumFields = 0;
+    m_iFixedFields = 0;
+    m_iSignalFields = 0;
+
+    m_vSampleNames.clear();
+    m_vFields.clear();
+    m_mapSampleToIndexes.clear();
+    m_mapFieldToIndexes.clear();
+
+    m_callTable.reset();
+}
+
+int IndexHeader::bytesForField(string strFieldType)
+{
+    if (strFieldType == "byte" || strFieldType == "char" || strFieldType == "int8") {
+        return 1;
+    }
+    else if (strFieldType == "int16") {
+        return 2;
+    }
+    else if (strFieldType == "int32" || strFieldType == "float32") {
+        return 4;
+    }
+    else if (strFieldType == "int64" || strFieldType == "float64") {
+        return 8;
+    }
+    else {
+        return 0;
+    }
+}
+
+bool IndexHeader::readFile(string strIndexFile)
+{
+    clearErrMsg();
+
+    try {
+        ifstream file;
+        file.open(strIndexFile.c_str());
+        if (!file.is_open()) {
+            setErrMsg("Failed to open index file for reading.\tFile: " + strIndexFile);
+            return false;
+        }
+
+        m_callTable.reset();
+        char szLine[MAX_LINE];
+        while (file.getline(szLine, MAX_LINE)) {
+            vector<string> vTokens, vParts;
+            string strLine = szLine;
+            Util::trimString(strLine);
+            if (strLine.find("#%%format-version=") == 0) {
+                string strFormatVersion = strLine.substr(18);
+                Util::trimString(strFormatVersion);
+                m_dFormatVersion = Convert::toDouble(strFormatVersion);
+            }
+            else if (strLine.find("#%%brlmmp-transform=") == 0) {
+                string strTransform = strLine.substr(20);
+                Util::trimString(strTransform);
+                strTransform = Util::upcaseString(strTransform);
+                m_strTransformMethod = strTransform;
+            }
+            else if (strLine.find("#%%num-probesets=") == 0) {
+                string strNumProbeSets = strLine.substr(17);
+                Util::trimString(strNumProbeSets);
+                m_iNumProbeSets = Convert::toInt(strNumProbeSets);
+            }
+            else if (strLine.find("#%%num-samples=") == 0) {
+                string strNumSamples = strLine.substr(15);
+                Util::trimString(strNumSamples);
+                m_iNumSamples = Convert::toInt(strNumSamples);
+                m_vSampleNames.reserve(m_iNumSamples);
+            }
+            else if (strLine.find("#%%cel-name-") == 0) {
+                Util::chopString(strLine, "=", vTokens);
+                if (vTokens.size() == 2) {
+                    string strSampleName = vTokens[1]; Util::trimString(strSampleName);
+                    string strSampleNameLower = strSampleName;
+                    strSampleNameLower = Util::downcaseString(strSampleNameLower);
+                    int iSampleIndex = (int)m_vSampleNames.size();
+                    m_vSampleNames.push_back(strSampleName);
+                    m_mapSampleToIndexes.insert(make_pair(strSampleNameLower, iSampleIndex));
+                }
+            }
+            else if (strLine.find("#%%num-fields=") == 0) {
+                string strNumFields = strLine.substr(14);
+                Util::trimString(strNumFields);
+                m_iNumFields = Convert::toInt(strNumFields);
+                m_vFields.reserve(m_iNumFields);
+            }
+            else if (strLine.find("#%%field-") == 0) {
+                Util::chopString(strLine, "=", vTokens);
+                if (vTokens.size() == 2) {
+                    string strField = vTokens[1]; Util::trimString(strField);
+                    Util::chopString(strField, ":", vParts);
+                    if (vParts.size() == 2) {
+                        string strName = vParts[0]; Util::trimString(strName);
+                        string strType = vParts[1]; Util::trimString(strType);
+                        int numBytesForField = IndexHeader::bytesForField(strType);
+                        if (numBytesForField > 0) {
+                            string strNameLower = strName;
+                            strNameLower = Util::downcaseString(strName);
+                            int iFieldIndex = (int)m_vFields.size();
+                            m_vFields.push_back(make_pair(strName + ":" + strType, numBytesForField));
+                            m_mapFieldToIndexes.insert(make_pair(strNameLower, iFieldIndex));
+                        }
+                    }
+                }
+            }
+            else if (strLine.find("#%%max-alleles=") == 0) {
+                string strMaxAlleles = strLine.substr(15);
+                Util::trimString(strMaxAlleles);
+                int iMaxAlleles = Convert::toInt(strMaxAlleles);
+                m_callTable.setMaxAlleles(iMaxAlleles);
+            }
+            else if (strLine.find("#%%max-cn-states=") == 0) {
+                string strMaxCNStates = strLine.substr(17);
+                Util::trimString(strMaxCNStates);
+                int iMaxCNStates = Convert::toInt(strMaxCNStates);
+                m_callTable.setMaxCNStates(iMaxCNStates);
+            }
+            else if (strLine.find("#%%call-code-") == 0) {
+                Util::chopString(strLine, "=", vTokens);
+                if (vTokens.size() == 2) {
+                    string strField = vTokens[1]; Util::trimString(strField);
+                    Util::chopString(strField, ":", vParts);
+                    if (vParts.size() == 3) {
+                        string strCallName = vParts[0]; Util::trimString(strCallName);
+                        string strCallCode = vParts[1]; Util::trimString(strCallCode);
+                        string strCNState = vParts[2]; Util::trimString(strCNState);
+                        int iCallCode = Convert::toInt(strCallCode);
+                        int iCNState = Convert::toInt(strCNState);
+                        CallRow row;
+                        row.setRowIndex(m_callTable.getCount());
+                        row.setCallName(strCallName);
+                        row.setCallCode(iCallCode);
+                        row.setCNState(iCNState);
+                        m_callTable.add(row);
+                    }
+                }
+            }
+        }
+
+        file.close();
+
+        // save index file name
+        setIndexFile(strIndexFile);
+
+        if (getNumFields() == 0) {
+            setNumFields((int)m_vFields.size());
+        }
+        setFixedFields(4); // Call/Confidence/LogRatio/Strength
+        setSignalFields(getNumFields() - getFixedFields());
+
+        if (getNumSamples() != (int)m_vSampleNames.size()) {
+            setErrMsg("Number of samples is not consistent with number of cel files.\tFile: " + strIndexFile + ", NumSamples: " + Convert::toString(getNumSamples()) + ", NumCelFiles: " + Convert::toString(m_vSampleNames.size()));
+            return false;
+        }
+
+        if (getNumFields() != (int)m_vFields.size()) {
+            setErrMsg("Number fields in sample is not consistent with number of field names.\tFile: " + strIndexFile + ", NumFieldsInSample: " + Convert::toString(getNumFields()) + ", NumFieldNames: " + Convert::toString(m_vFields.size()));
+            return false;
+        }
+    }
+    catch (...) {
+        setErrMsg("Unknown exception occurred while parse header section for index file.\tFile: " + strIndexFile);
+        return false;
+    }
+
+    return true;
+}
+
+int IndexHeader::getBytesPerSample(int numAlleles)
+{
+    int iBytesPerSample = 0;
+    for (int i = 0; i < (m_iFixedFields + numAlleles); i++) {
+        if (i < (int)m_vFields.size()) {
+            iBytesPerSample += m_vFields[i].second;
+        }
+    }
+    return iBytesPerSample;
+}
+
+int IndexHeader::getBytesPerSampleBlock(int numAlleles)
+{
+    int bytesPerSample = getBytesPerSample(numAlleles);
+    return bytesPerSample * getNumSamples();
+}
+
+int IndexHeader::getBytesPerSampleBlock(SampleList& vSamples)
+{
+    int bytesPerSampleBlock = 0;
+    for (int i = 0; i < (int)vSamples.size(); i++) {
+        bytesPerSampleBlock += getBytesPerSample(vSamples[i].getNumAlleles());
+    }
+    return bytesPerSampleBlock;
+}
+
+int IndexHeader::findSampleIndex(string strSampleName)
+{
+    std::map<std::string, int>::iterator iterFind;
+    string strSampleNameLower = strSampleName;
+    strSampleNameLower = Util::downcaseString(strSampleNameLower);
+    iterFind = m_mapSampleToIndexes.find(strSampleNameLower);
+    if (iterFind != m_mapSampleToIndexes.end()) {
+        return iterFind->second;
+    }
+    return -1; // not found
+}

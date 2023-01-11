@@ -1,0 +1,98 @@
+//
+// ~/apt2-src/util-package/CallTable.h ---
+//
+// Revision History:
+// Created by David Le on 11/30/2015
+//
+
+#ifndef __CALLTABLE_H__
+#define __CALLTABLE_H__
+
+#include "util-package/PackageConsts.h"
+#include "util/Convert.h"
+
+#include <vector>
+
+class CallTable;
+class CallRow;
+
+class CallTable : public std::vector<CallRow>
+{
+public:
+    CallTable();
+    ~CallTable();
+
+public:
+    std::string getErrMsg() { return m_strErrMsg; }
+    void setErrMsg(std::string str) { m_strErrMsg = str; }
+    void clearErrMsg() { m_strErrMsg = ""; }
+
+    std::string getIndexFile() { return m_strIndexFile; }
+    void setIndexFile(std::string str) { m_strIndexFile = str; }
+
+    int getMaxAlleles() { return m_iMaxAlleles; }
+    void setMaxAlleles(int i) { m_iMaxAlleles = i; }
+
+    int getMaxCNStates() { return m_iMaxCNStates; }
+    void setMaxCNStates(int i) { m_iMaxCNStates = i; }
+
+    int getNextRowIndex() { return m_iNextRowIndex; }
+    void setNextRowIndex(int i) { m_iNextRowIndex = i; }
+    int nextRowIndex() { int rowIndex = m_iNextRowIndex; m_iNextRowIndex++; return rowIndex; }
+
+public:
+    int getCount() { return (int)size(); }
+    void reset();
+    bool readFile(std::string strIndexFile);
+    bool add(CallRow& row);
+    bool add(std::string strCallName, int iCallCode, int iCNState);
+    void sortByRowIndex();
+    void sortByCallName();
+    void sortByCallNameCNState();
+    CallTable::iterator find(std::string strCallName);
+    CallTable::iterator find(std::string strCallName, int iCNState);
+
+private:
+    std::string m_strErrMsg;
+    std::string m_strIndexFile;
+    int m_iMaxAlleles;
+    int m_iMaxCNStates;
+    int m_iNextRowIndex;
+};
+
+class CallRow
+{
+public:
+    CallRow();
+    ~CallRow();
+
+    static bool compareRowIndex(const CallRow& elem1, const CallRow& elem2);
+    static bool compareCallName(const CallRow& elem1, const CallRow& elem2);
+    static bool compareCallNameCNState(const CallRow& elem1, const CallRow& elem2);
+
+public:
+    int getRowIndex() { return m_iRowIndex; }
+    void setRowIndex(int i) { m_iRowIndex = i; }
+
+    std::string getCallName() { return m_strCallName; }
+    void setCallName(std::string str) { m_strCallName = str; }
+
+    int getCallCode() { return m_iCallCode; }
+    void setCallCode(int i) { m_iCallCode = i; }
+
+    int getCNState() { return m_iCNState; }
+    void setCNState(int i) { m_iCNState = i; }
+
+public:
+    void reset();
+    std::string getCallCodeStr() { return m_strCallName + ":" + Convert::toString(m_iCallCode) + ":" + Convert::toString(m_iCNState); }
+    std::string getRowStr();
+
+private:
+    int m_iRowIndex;
+    std::string m_strCallName;
+    int m_iCallCode;
+    int m_iCNState;
+};
+
+#endif

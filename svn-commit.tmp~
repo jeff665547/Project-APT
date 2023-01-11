@@ -1,0 +1,10 @@
+
+--This line, and those below, will be ignored--
+
+M    sdk/translation/RunTimeEnvironment.h
+M    sdk/translation/TranslationInputStreamTableModel.cpp
+M    sdk/translation/ADTOptions.h
+M    sdk/translation/TranslationCommonControl.cpp
+M    sdk/translation/apt-dmet-translation.cpp
+M    sdk/translation/TranslationInputStreamTableModel.h
+M    sdk/util/AptVersionInfo.h

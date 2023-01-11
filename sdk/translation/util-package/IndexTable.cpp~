@@ -1,0 +1,192 @@
+//
+// ~/apt2-src/util-package/IndexTable.cpp ---
+//
+// Revision History:
+// Created by David Le on 11/30/2015
+//
+
+#include "IndexTable.h"
+#include "util/Convert.h"
+#include "util/Fs.h"
+#include "util/Util.h"
+
+#include <algorithm>
+#include <iostream>
+#include <sstream>
+#include <string.h>
+#include <memory>
+
+using namespace std;
+
+IndexTable::IndexTable()
+{
+    reset();
+}
+
+IndexTable::~IndexTable()
+{
+}
+
+void IndexTable::reset()
+{
+    m_strErrMsg = "";
+    m_strIndexFile = "";
+}
+
+bool IndexTable::readFile(string strIndexFile)
+{
+    ifstream file;
+    file.open(strIndexFile.c_str());
+    if (!file.is_open()) {
+        setErrMsg("Failed to open index file for reading.\tFile: " + strIndexFile);
+        return false;
+    }
+
+    clear();
+    bool bInDataSection = false;
+    bool bContainsNumAlleles = false;
+    char szLine[MAX_LINE];
+    while (file.getline(szLine, MAX_LINE)) {
+        string strLine = szLine;
+        Util::trimString(strLine);
+        if (strLine.find("#") == 0) {
+            continue;
+        }
+        else if (strLine.find("ProbeSetId\tRowIndex\tOffset") == 0) {
+            bInDataSection = true;
+            bContainsNumAlleles = (strLine.find("ProbeSetId\tRowIndex\tOffset\tNumAlleles") == 0);
+            continue;
+        }
+        if (bInDataSection) {
+            vector<string> vTokens;
+            Util::chopString(strLine, "\t", vTokens);
+            if (vTokens.size() < 3) {
+                setErrMsg("Invalid snp index line detected, expected at least 3 data columns. Line: " + strLine + ", NumColumns: " + Convert::toString(vTokens.size()));
+                return false;
+            }
+            IndexRow row;
+            int iRowIndex = Convert::toInt(vTokens[1]);
+            int iFileOffset = Convert::toInt64(vTokens[2]);
+            row.setProbeSetId(vTokens[0]);
+            row.setRowIndex(iRowIndex);
+            row.setFileOffset(iFileOffset);
+            if (vTokens.size() >= 4 && bContainsNumAlleles) {
+                int iNumAlleles = Convert::toInt(vTokens[3]);
+                row.setNumAlleles(iNumAlleles);
+            }
+            push_back(row);
+        }
+    }
+
+    file.close();
+
+    // save index file name
+    setIndexFile(strIndexFile);
+    setSortMode(BY_ROWINDEX);
+
+    return true;
+}
+
+bool IndexTable::addRow(string strProbeSetId, int iRowIndex, __int64 iFileOffset, int iNumAlleles)
+{
+    try {
+        IndexRow row;
+        row.setProbeSetId(strProbeSetId);
+        row.setRowIndex(iRowIndex);
+        row.setFileOffset(iFileOffset);
+        row.setNumAlleles(iNumAlleles);
+        push_back(row);
+    }
+    catch (...) {
+        return false;
+    }
+    return true;
+}
+
+bool IndexTable::isRowIndexAssigned()
+{
+    for (int i = 0; i < getCount(); i++) {
+        if (at(i).getRowIndex() == -1) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void IndexTable::assignRowIndexes()
+{
+    for (int i = 0; i < getCount(); i++) {
+        at(i).setRowIndex(i);
+    }
+}
+
+void IndexTable::sortByRowIndex()
+{
+    if (isRowIndexAssigned()) {
+        std::sort(begin(), end(), IndexRow::compareRowIndex);
+    }
+    else {
+        assignRowIndexes();
+    }
+    setSortMode(BY_ROWINDEX);
+}
+
+void IndexTable::sortByProbeSetId()
+{ 
+    std::sort(begin(), end(), IndexRow::compareProbeSetId); 
+    setSortMode(BY_PROBESETID);
+}
+
+IndexTable::iterator IndexTable::find(std::string strProbeSetId)
+{
+    if (!isSortedByProbeSetId()) {
+        sortByProbeSetId();
+    }
+    IndexTable::iterator iterFind;
+    IndexRow search;
+    search.setProbeSetId(strProbeSetId);
+    iterFind = lower_bound(begin(), end(), search, IndexRow::compareProbeSetId);
+    if (iterFind != end() && iterFind->getProbeSetId() == strProbeSetId) {
+        return iterFind;
+    }
+    else {
+        return end();
+    }
+}
+
+IndexRow::IndexRow()
+{
+    reset();
+}
+
+IndexRow::~IndexRow()
+{
+}
+
+void IndexRow::reset()
+{
+    m_iRowIndex = -1; // not initialized
+    m_strProbeSetId = "";
+    m_iFileOffset = 0;
+    m_iNumAlleles = 2; // default to bi-allelic
+}
+
+bool IndexRow::compareRowIndex(const IndexRow& elem1, const IndexRow& elem2)
+{
+    return (elem1.m_iRowIndex < elem2.m_iRowIndex);
+}
+
+bool IndexRow::compareProbeSetId(const IndexRow& elem1, const IndexRow& elem2)
+{
+    return (elem1.m_strProbeSetId < elem2.m_strProbeSetId);
+}
+
+string IndexRow::getRowStr()
+{
+    string strRow = "";
+    strRow += "RowIndex: " + Convert::toString(m_iRowIndex);
+    strRow += ", ProbeSetId: " + m_strProbeSetId;
+    strRow += ", FileOffset: " + Convert::toString((int)m_iFileOffset);
+    strRow += ", NumAlleles: " + Convert::toString(m_iNumAlleles);
+    return strRow;
+}

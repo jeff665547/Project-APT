@@ -1,0 +1,83 @@
+/**
+\page apt-copynumber-familial MANUAL: apt-copynumber-familial (\aptversion)
+
+\section familialContent Contents
+
+<ul>
+<li><a href="#intro">Introduction.</a></li>
+<li><a href="#comments">Comments</a></li>
+<li><a href="#options">Program Options - command line options.</a></li>
+<li><a href="#faq">FAQ - Frequently Asked Questions.</a></li>
+</ul>
+
+<a name="intro">
+\section familialIntr Introduction
+
+apt-copynumber-familial - program for analyzing trios and duos or cychp files
+from Affymetrix cytogenetics microarrays.
+
+<a name="comments">
+\section comments Comments
+
+The following are true of the command line:
+
+<ul>
+<li>Must be provided:</li>
+  <ul>
+  <li><b>index-cychp-file</b> &ndash; cychp file corresponding to assumed child.</li>
+  </ul>
+<li>At least one of these two should be supplied:</li>
+  <ul>
+  <li><b>mother-cychp-file</b> &ndash; cychp file corresponding to assumed mother,</li>
+  <li><b>father-cychp-file</b> &ndash; cychp file corresponding to assumed father.</li>
+  </ul>
+<li>If all three are provided, then both child-parent pairs will be tested and then all three as a unit.</li>
+<li>Also must be provided:</li>
+  <ul>
+  <li><b>allele-frequency-file</b> &ndash; used to indicate a file containing the subset
+      of markers used for the test statistic and associated allele frequencies (determined from HapMap).
+      This file has been supplied with the tool.
+  </li>
+  <li><b>familial-file</b> &ndash; the output FAM file.
+  </ul>
+<li>The analysis string specifies the analysis to be carried out:</li>
+  <ul>
+  <li>Currently only one analysis type is supported by the tool: <b>paternity</b></li>
+  <li>The subsequent portion of that string is the single parameter:</li>
+    <ul>
+    <li><b>role-validity-threshold</b> &ndash; used to make a positive determination call.</li>
+    </ul>
+  </ul>
+<li>Output locations should be specified.</li>
+<li>Text file output will be generated using the root specified by <b>familial-file</b>.</li>
+</ul>
+
+<a name="options">
+\subsection manualOptions Options:
+
+<!-- Do not edit this verbatim section.
+     It will be replaced automatically w/ the results
+     of running this program with the -h option
+     --->
+
+\verbinclude apt-copynumber-familial.help.txt
+
+<a name="faq">
+\section manFaq Frequently Asked Questions
+
+Q. What is a probe_id?
+
+A. See the <a href="FAQ.html#probe_id_faq">FAQ item on probe IDs</a> for more info.
+
+Q. Wild cards do not work on windows. For example:
+<pre>
+    apt-copynumber-familial ... *.CEL
+</pre>
+
+A. APT relies on the command shell to do the wild card expansion (ie bash shell on
+   *NIX systems). The windows shell does not do wild card expansion, so there is no
+   wild card expansion for APT when run from the windows shell. You may want to try
+   a different windows shell or perhaps bash via cygwin. See the --cel-files option
+   as an alternative to specify CEL files for analysis.
+
+*/

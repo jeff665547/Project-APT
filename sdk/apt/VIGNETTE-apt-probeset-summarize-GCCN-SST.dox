@@ -1,0 +1,80 @@
+/**
+
+\page VIGNETTE-apt-probeset-summarize-GCCN-SST VIGNETTES: Using GC Correction (GCCN) and Space Transformation (SST) algorthms with apt-probeset-summarize
+
+\date 2015-03-05
+
+\section content Contents
+
+ - <a href="#intro">	Introduction</a>
+ - <a href="#quick">	Quick Start</a>
+ - <a href="#custom"> Customization Command Line Options</a>
+
+\section intro Introduction
+
+This vignette describes how to use apt-probeset-summarize to apply RMA summarization with GC Correction (GCCN) and Space Transformation (SST) algoritms.
+
+\section example Transforming a single HTA cel file
+
+This should give fold change which compares well with other techniques, like Next Gen Sequencing. 
+
+\verbatim
+apt-probeset-summarize  \
+      --store-duplicate-probes \
+      -a gc-sst-rma-sketch \
+      -p HTA-2_0.r1.pgf \
+      -c HTA-2_0.r1.clf \
+      -o my_output_folder \ 
+      --cel-files cel_files.txt \
+      --qc-probesets HTA-2_0.r1.qcc
+\endverbatim
+
+NOTE: qc-probesets file is optional.  Any probes in probe sets called out in the qcc file will be excluded from GCCN and SST
+
+The QCC file is a tab delimited text file with the following columns:
+ - probeset_id - Matches the probe-set id in the pgf file. Probes in this probe set will be excluded from GCCN and SST processing depending on the value of the quantification_in_header column.
+ - group_name - Has no effect.
+ - probeset_name - Has no effect.
+ - quantification_in_header - Probe sets with a value 1 in this column will be excluded from GCCN and SST processing.  Probe sets with a value 0 in this column will be processed using GCCN and SST.
+
+\section custom Custmization Command Line Options
+
+The following command line shows customization of the opttions for GC correction and Space Transformation:
+
+\verbatim
+apt-probeset-summarize \
+      --store-duplicate-probes \
+      -a gc-correction \
+              .cel_out=false, \
+         scale-intensities \
+              .floor=1 \
+              .low=20 \
+              .high=50000 \
+              .ceiling=1000000 \
+              .low_pct=0.02 \
+              .high_pct=0.98 \
+              .cel_out=false, \
+         rma-bg, \
+         quant-norm.sketch=0.usepm=true.bioc=true, \
+         pm-only, \
+         med-polish \
+      -p HTA-2_0.r1.pgf \
+      -c HTA-2_0.r1.clf \
+      -o my_output_folder \
+      --cel-files cel_files.txt
+\endverbatim
+
+Where:
+
+ - cel_out = true : Generate cel files that contain probe intensities immediately after gc-correction and/or scale-intensities Default false.
+ - floor : Minimum allowed value for CEL intensities.  Default 1.
+ - low : Target low intensity for low_pct. Default 20.
+ - high : Target high intensity for high_pct. Default 50000.
+ - ceiling : Maximum allowed value for CEL intensities. Default 1000000.
+ - low_pct : Target percentile to which the low intensity is projected. Default 0.02.
+ - high_pct : Target percentile to which the high intensity is projected. Default 0.98.
+
+
+
+*/
+

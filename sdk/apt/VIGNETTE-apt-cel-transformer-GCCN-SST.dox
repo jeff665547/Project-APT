@@ -1,0 +1,70 @@
+/**
+
+\page VIGNETTE-apt-cel-transformer-GCCN-SST VIGNETTES: Applying GC Correction (GCCN) and Space Transformation (SST) with apt-cel-transformer
+
+\date 2015-03-05
+
+\section content Contents
+
+ - <a href="#intro">	Introduction</a>
+ - <a href="#example">	Transforming a single HTA cel file</a>
+ - <a href="#multiple-cels"> Transforming multiple cel files</a>
+ - <a href="#cel-header"> CEL Header Modification</a>
+
+\section intro Introduction
+
+This vignette describes how to use the apt-cel-transformer application to apply the GC Correction (GCCN) and Space Transformation (SST)
+algorithms to CEL files.
+
+\section example Transforming a single HTA cel file
+
+The following command line will transform a single HTA cel file using GCCN and SST with default parameters. 
+A cel file (with the same name) is written to directory Output. 
+
+\verbatim
+apt-cel-transformer 
+   --pgf-file ..\HTA-2_0.r1.pgf 
+   --clf-file ..\HTA-2_0.r1.clf 
+   -c gc-correction,scale-intensities 
+   -o Output 
+   ..\CEL\HTA2_LS_Pool1_PolyA_EC1_4.CEL
+   --qc-probesets HTA-2_0.r1.qcc
+\endverbatim
+
+<b>Note:</b> The order of the transformations here is the same as used by apt-probeset-summarize.  Changing the order will significantly degrade performance.
+
+The `qc-probesets` file is optional.  Any probes in probe sets called out in the qcc file will be excluded from GCCN and SST.
+
+The QCC file is a tab delimited text file with the following columns:
+ -  probeset_id - Matches the probe-set id in the pgf file. Probes in this probe set will be excluded from GCCN and SST processing depending on the value of the quantification_in_header column.
+ - group_name - Has no effect on GC Correction processing.
+ - probeset_name - Has no effect on GC Correction processing.
+ - quantification_in_header -  Probe sets with a value 1 in this column will be excluded from GCCN and SST processing. Probe sets with a value 0 in this column will be processed using GCCN and SST.
+
+\section multiple-cels Transforming multiple cel files
+
+The following command line will transform all the cel files listed in file ..\cel_files.txt using GC4 and SST with default parameters. 
+Output cel files are writen (with the same name) to directory Output. 
+
+\verbatim
+apt-cel-transformer 
+   --pgf-file ..\HTA-2_0.r1.pgf 
+   --clf-file ..\HTA-2_0.r1.clf 
+   -c gc-correction,scale-intensities 
+   -o Output
+   --cel-files ..\cel_files.txt
+\endverbatim
+
+
+\section cel-header CEL Header Modification
+
+`apt-cel-transformer` adds parameters to the cel file header.
+
+The command line is written to `affymetrix-algorithm-param-command-line`.
+
+If gc-correction is included in the chipstream, then `affymetrix-algorithm-param-gc-correction` is added to the header.
+
+If scale-intensities is included in the chipstream, then `affymetrix-algorithm-param-SST` is added to the header.
+
+*/
+

@@ -1,0 +1,56 @@
+//
+// ~/apt2-src/util-package/IndexReader.h ---
+//
+// Revision History:
+// Created by David Le on 11/30/2015
+//
+
+#ifndef __INDEXREADER_H__
+#define __INDEXREADER_H__
+
+#include "util-package/IndexHeader.h"
+#include "util-package/IndexTable.h"
+#include "util-package/PackageConsts.h"
+#include "util-package/SampleTypesEx.h"
+#include <iostream>
+#include <string>
+#include <cstring>
+#include <map>
+#include <set>
+#include <vector>
+
+class IndexReader
+{
+public:
+    IndexReader();
+    ~IndexReader();
+
+public:
+    std::string getErrMsg() { return m_strErrMsg; }
+    void setErrMsg(std::string str) { m_strErrMsg = str; }
+    void clearErrMsg() { m_strErrMsg = ""; }
+
+    std::string getIndexFile() { return m_strIndexFile; }
+    void setIndexFile(std::string str) { m_strIndexFile = str; }
+
+    int getNumProbeSets() { return m_indexHeader.getNumProbeSets(); }
+    int getNumSamples() { return m_indexHeader.getNumSamples(); }
+    int getNumFieldsInSample() { return m_indexHeader.getNumFields(); }
+    int getMaxAlleles() { return m_indexHeader.getMaxAlleles(); }
+
+    IndexHeader& getIndexHeader() { return m_indexHeader; }
+    IndexTable& getIndexTable() { return m_indexTable; }
+
+public:
+    void reset();
+    bool readFile(std::string strIndexFile);
+
+private:
+    std::string m_strErrMsg;
+    std::string m_strIndexFile;
+
+    IndexHeader m_indexHeader;
+    IndexTable m_indexTable;
+};
+
+#endif
