@@ -100,11 +100,11 @@ pair<string, string> decodeReportStandAlleleCodePair(string ac, string dsa)
 
 	if (alleleCodes[0] == "A")
 	{
-		return make_pair<string, string>(reportAllele[0], reportAllele[1]);
+		return make_pair(reportAllele[0], reportAllele[1]);
 	}
 	else
 	{
-		return make_pair<string, string>(reportAllele[1], reportAllele[0]);
+		return make_pair(reportAllele[1], reportAllele[0]);
 	}
 }
 
@@ -243,7 +243,7 @@ void GenotypeTranslationEngine::runImp()
 	while(tsv.nextLevel(0) == TSV_OK)
 	{
 		if (translationMap.find(psid) == translationMap.end())
-			translationMap[psid] = make_pair<string, string>("", "");
+			translationMap[psid] = make_pair("", "");
 
 		if (numChannels == 1)
 		{

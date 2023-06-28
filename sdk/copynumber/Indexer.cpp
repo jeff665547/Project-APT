@@ -36,7 +36,7 @@ using namespace std;
 pair<int,int> index_to_rc(int probe_id, int ncol)
 	{
 	int pos = probe_id - 1;
-	return make_pair<int,int>(pos % ncol, ncol - pos/ncol - 1);
+	return make_pair(pos % ncol, ncol - pos/ncol - 1);
 	}
 
 // row and column to probe ID.
@@ -49,6 +49,6 @@ pair<int,int> probeid_to_rc(int probe_id, int nrow, int ncol)
 	{
 	int row = (probe_id - 1) % nrow;
 	int col = ncol - (probe_id - 1)/nrow - 1;
-	return make_pair<int,int>(row,col);
+	return make_pair(row,col);
 	}
 

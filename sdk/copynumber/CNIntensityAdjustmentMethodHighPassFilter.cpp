@@ -318,7 +318,7 @@ void CNIntensityAdjustmentMethodHighPassFilter::pid_lookup(vector<pair<int,int> 
 		const int row_stop, const int image_width)
 {
 	int block_sz = (row_stop - row_start)*image_width;
-	lookup.resize(block_sz,make_pair<int,int>(0,0));
+	lookup.resize(block_sz,make_pair(0,0));
 
 	for (int i=0; i<getProbes()->size(); i++) {
 		pair<int,int> row_col = index_to_rc(getProbes()->at(i)->getProbeID(),image_width);

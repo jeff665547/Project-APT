@@ -141,7 +141,7 @@ if (-f $location_txt_file) {
     $gcc_opt_O=$1;
   }
 
-  $opt_cflags="-Wall -Wno-sign-compare";
+  $opt_cflags="-Wall -Wno-sign-compare -std=c++14 -lstdc++";
 
   # if it starts with "i386" then this is a 32bit system.
   # we work with large files, an would like to use the 64bit system calls.

@@ -28,7 +28,7 @@ using namespace std;
 // row,col givs the size of the ArrayLevel
 ArrayLevel::ArrayLevel(int nrow, int ncol)
     {
-    m_size = make_pair<int,int>(nrow,ncol);
+    m_size = make_pair(nrow,ncol);
     m_array.resize(m_size.first*m_size.second,ArrayElement());
 
     // Assume the next level will not be made and if incorrect allocate it.

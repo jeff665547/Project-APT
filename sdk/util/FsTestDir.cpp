@@ -25,7 +25,7 @@
 #include "util/AptErrno.h"
 #include "util/Fs.h"
 #include "util/FsTestDir.h"
-
+#include <unistd.h>
 //////////
 
 AptErr_t FsTestDir::setTestDir( const std::string & testcasepath, const bool clean, const int64_t bytescheck ) {

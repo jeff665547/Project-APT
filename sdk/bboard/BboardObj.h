@@ -35,7 +35,9 @@
 
 class BboardObj {
 public:
-  virtual ~BboardObj();
+  virtual ~BboardObj() {
+    // no-op
+  };
   // returns "name-of-obj"
   virtual std::string getBboardTypeStr() = 0;
   //

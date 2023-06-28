@@ -264,9 +264,9 @@ vector<BinaryCNodeParamNormal> make_bcn_params_normal( valarray<double> mu,
 
 	for (int i=1; i<mu.size(); i++) {
 		std::pair<double,double>mu1 =
-			std::make_pair<double,double>(mu[i-1],mu[i]);
+			std::make_pair(mu[i-1],mu[i]);
 		std::pair<double,double>var1 =
-			std::make_pair<double,double>(var[i-1],var[i]);
+			std::make_pair(var[i-1],var[i]);
 
 		bcn_params.push_back(BinaryCNodeParamNormal(mu1,var1,
 			tprob[i-1],bias[i-1]));

@@ -291,14 +291,14 @@ bool CL_File::f_open_r()
 {
   m_fstream.clear();
   m_fstream.open(m_filename.c_str(),std::ios::in|std::ios::binary);
-  bool rv=m_fstream;
+  bool rv=m_fstream.is_open();
   return rv;
 }
 bool CL_File::f_open_w()
 {
   m_fstream.clear();
   m_fstream.open(m_filename.c_str(),std::ios::out|std::ios::binary);
-  bool rv=m_fstream;
+  bool rv=m_fstream.is_open();
   return rv;
 }
 

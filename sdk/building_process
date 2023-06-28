@@ -1,0 +1,13 @@
+Toy Example
+ENV: gcc version 7.5.0 (Ubuntu 7.5.0-3ubuntu1~18.04), Thread model: posix, GNU Make 3.81
+
+1. Configure w/o CppUnit
+    ./configure --without-cppunit
+2. Build the project
+    make
+3. Change the executable permissions for files.
+    chmod +x <filename>
+4. Fix for the zlib library.
+    cd ./../external/zlib && make clean
+    ./configure --prefix=/home/jeffho/APT/sdk/./output/x86_64-intel-linux --libdir=/home/jeffho/APT/sdk/./output/x86_64-intel-linux/lib --includedir=/home/jeffho/APT/sdk/./output/share/include && make && make install
+5. Patching the source code.

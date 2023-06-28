@@ -174,7 +174,7 @@ class vectormap
   }
   pair <iterator_t,iterator_t> equal_range(const key_t key) {
     //ensure_sorted();
-    return make_pair<iterator_t,iterator_t>(vlower_bound(key),vupper_bound(key));
+    return make_pair(vlower_bound(key),vupper_bound(key));
   }
   
   /// @brief       Dumps the contents of the map for debugging.

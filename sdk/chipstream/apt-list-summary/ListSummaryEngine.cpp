@@ -395,7 +395,7 @@ void ListSummaryEngine::runImp()
 	for (vector<string>::iterator it=listFiles.begin(); it!=listFiles.end(); it++)
 	{
 		summaryData[*it] = computeMedianData(*it, unknownCodeRate);
-		unknownCodeRates.push_back(std::make_pair<string, float>(GetFileTitle(*it), unknownCodeRate));
+		unknownCodeRates.push_back(std::make_pair(GetFileTitle(*it), unknownCodeRate));
 	}
 
 	// Output the data to the summary and CV files.
@@ -702,7 +702,7 @@ void ListSummaryEngine::readAnnotationFile()
 	while(tsv.nextLevel(0) == TSV_OK)
 	{
 		markerOrder.push_back(probeid);
-		annotMap[probeid] = make_pair<string, string>(probesetid, parseAlleleCode(channel, code));
+		annotMap[probeid] = make_pair(probesetid, parseAlleleCode(channel, code));
 	}
 	tsv.close();
 }
@@ -738,7 +738,7 @@ void ListSummaryEngine::readMixFile()
 			id = note;
 			markerOrder.push_back(id);
 		}
-		mixMap[code] = make_pair<string, int>(id, typeValue);
+		mixMap[code] = make_pair(id, typeValue);
 	}
 	tsv.close();
 }

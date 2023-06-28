@@ -34,17 +34,17 @@ DataBlock::DataBlock(unsigned int nrow, unsigned int ncol,
 
     // Here is where the numeric data are stored.
     m_data.resize(nrow*ncol,0.0);
-    m_size = make_pair<unsigned int,unsigned int>(nrow,ncol);
+    m_size = make_pair(nrow,ncol);
 
     // Assume the data are missing until seen
     m_missing.resize(nrow*ncol,true);
 
     // The background is estimated in blocks to save computation time.
-    m_block_size = make_pair<unsigned int,unsigned int>(brows,bcols);
+    m_block_size = make_pair(brows,bcols);
 
     int sz1 = (nrow - 1)/brows + 1;
     int sz2 = (ncol - 1)/bcols + 1;
-    m_nblocks = make_pair<unsigned int,unsigned int>(sz1,sz2);
+    m_nblocks = make_pair(sz1,sz2);
 
     // This is where the background will be estimated.
     m_array = new ArrayLevel(sz1,sz2);

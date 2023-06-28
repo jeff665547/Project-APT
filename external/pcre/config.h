@@ -63,10 +63,10 @@ them both to 0; an emulation function will be used. */
 #define HAVE_MEMORY_H 1
 
 /* Define to 1 if you have the <readline/history.h> header file. */
-#define HAVE_READLINE_HISTORY_H 1
+/* #undef HAVE_READLINE_HISTORY_H */
 
 /* Define to 1 if you have the <readline/readline.h> header file. */
-#define HAVE_READLINE_READLINE_H 1
+/* #undef HAVE_READLINE_READLINE_H */
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #define HAVE_STDINT_H 1
@@ -90,8 +90,7 @@ them both to 0; an emulation function will be used. */
 /* #undef HAVE_STRTOLL */
 
 /* Define to 1 if you have the `strtoq' function. */
-//aw: mod for windows #define HAVE_STRTOQ 1
-#define HAVE__STRTOI64 1
+#define HAVE_STRTOQ 1
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #define HAVE_SYS_STAT_H 1

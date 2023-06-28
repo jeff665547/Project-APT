@@ -1,0 +1,5 @@
+*.d
+.vscode/*
+external/*
+sdk/output/*
+sdk/util/core*

@@ -26,6 +26,7 @@
 #include "util/Fs.h"
 //
 #include <fcntl.h>
+#include <unistd.h>
 #include <sstream>
 #include <string>
 #include <sys/types.h>

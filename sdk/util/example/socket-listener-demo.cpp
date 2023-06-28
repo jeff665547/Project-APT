@@ -22,6 +22,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <unistd.h>
 
 // HACK: resolve winsock2.h compilation errors by including locally and not from SocketBase.h
 #ifdef WIN32

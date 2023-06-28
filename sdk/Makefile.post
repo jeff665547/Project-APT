@@ -41,7 +41,7 @@ $(sort ${sdk_output_dirs}):
 
 # do the subdirs with Makefiles unless told otherwise
 ifeq ($(origin sdk_subdirs),undefined)
-  m2_subdirs:=$(dir $(wildcard */Makefile))
+  m2_subdirs:=$(dir $(wildcard */*Makefile))
 else
   m2_subdirs:=${sdk_subdirs}
 endif
